@@ -1,21 +1,27 @@
 package users
 
 import (
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
 	"mealsDatabase/database"
 	"mealsDatabase/interfaces"
 	"mealsDatabase/utils"
+	"os"
 	"time"
 )
 
 func prepareToken(user *interfaces.User) string {
+	jwtKey, exists := os.LookupEnv("JWTKEY")
+	if !exists {
+		fmt.Println(exists)
+	}
 	tokenContent := jwt.MapClaims{
 		"user_id": user.ID,
 		"expiry":  time.Now().Add(time.Minute * 60).Unix(),
 	}
 	jwtToken := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), tokenContent)
-	token, err := jwtToken.SignedString([]byte("TokenPassword"))
+	token, err := jwtToken.SignedString([]byte(jwtKey))
 	utils.HandleErr(err)
 	return token
 }

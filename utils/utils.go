@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
@@ -81,10 +82,14 @@ func PanicHandler(next http.Handler) http.Handler {
 }
 
 func ValidateToken(id string, jwtToken string) bool {
+	jwtKey, exists := os.LookupEnv("JWTKEY")
+	if !exists {
+		fmt.Println(exists)
+	}
 	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
 	tokenData := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
-		return []byte("TokenPassword"), nil
+		return []byte(jwtKey), nil
 	})
 	HandleErr(err)
 	var userId, _ = strconv.ParseFloat(id, 8)

@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
@@ -11,6 +12,9 @@ import (
 	"mealsDatabase/users"
 	"mealsDatabase/utils"
 	"net/http"
+	"os"
+	"strings"
+	"time"
 )
 
 type Login struct {
@@ -73,6 +77,37 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 }
 func getMeals(w http.ResponseWriter, r *http.Request) {
 	//auth := r.Header.Get("Authorization")
+	if !ValidateRequestToken(r) {
+		apiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
+		return
+	}
 	responseMeals := meals.GetMeals()
 	apiResponse(responseMeals, w)
+}
+
+func ValidateRequestToken(r *http.Request) bool {
+	jwtKey, exists := os.LookupEnv("JWTKEY")
+	if !exists {
+		fmt.Println(exists)
+	}
+	jwtToken := r.Header.Get("Authorization")
+	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
+	tokenData := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtKey), nil
+	})
+	utils.HandleErr(err)
+
+	now := time.Now()
+	expiry := tokenData["expiry"].(float64)
+
+	expired := now.After(time.Unix(int64(expiry), 0))
+	if expired {
+		return false
+	}
+	if !token.Valid {
+		return false
+	}
+
+	return true
 }
