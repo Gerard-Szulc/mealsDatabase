@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"io/ioutil"
 	"log"
@@ -12,9 +11,6 @@ import (
 	"mealsDatabase/users"
 	"mealsDatabase/utils"
 	"net/http"
-	"os"
-	"strings"
-	"time"
 )
 
 type Login struct {
@@ -31,6 +27,7 @@ func readBody(r *http.Request) []byte {
 
 func apiResponse(call map[string]interface{}, w http.ResponseWriter) {
 	if call["message"] == "success.response_success" {
+		delete(call, "message")
 		resp := call
 		json.NewEncoder(w).Encode(resp)
 	} else {
@@ -44,7 +41,8 @@ func StartApi() {
 	router.Use(utils.PanicHandler)
 	router.HandleFunc("/login", login).Methods("POST")
 	router.HandleFunc("/register", register).Methods("POST")
-	router.HandleFunc("/user/{id}", getUser).Methods("GET")
+	router.HandleFunc("/users", getUsers).Methods("GET")
+	router.HandleFunc("/users/{id}", getUser).Methods("GET")
 	router.HandleFunc("/meals", getMeals).Methods("GET")
 	fmt.Println("App is working on port :2137")
 	log.Fatal(http.ListenAndServe(":2137", router))
@@ -71,43 +69,30 @@ func register(w http.ResponseWriter, r *http.Request) {
 func getUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userId := vars["id"]
-	auth := r.Header.Get("Authorization")
-	user := users.GetUser(userId, auth)
+	//auth := r.Header.Get("Authorization")
+	if !utils.ValidateRequestToken(r) {
+		apiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
+		return
+	}
+	user := users.GetUser(userId)
 	apiResponse(user, w)
 }
+
+func getUsers(w http.ResponseWriter, r *http.Request) {
+	if !utils.ValidateRequestToken(r) {
+		apiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
+		return
+	}
+	user := users.GetUsers()
+	apiResponse(user, w)
+}
+
 func getMeals(w http.ResponseWriter, r *http.Request) {
 	//auth := r.Header.Get("Authorization")
-	if !ValidateRequestToken(r) {
+	if !utils.ValidateRequestToken(r) {
 		apiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
 		return
 	}
 	responseMeals := meals.GetMeals()
 	apiResponse(responseMeals, w)
-}
-
-func ValidateRequestToken(r *http.Request) bool {
-	jwtKey, exists := os.LookupEnv("JWTKEY")
-	if !exists {
-		fmt.Println(exists)
-	}
-	jwtToken := r.Header.Get("Authorization")
-	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
-	tokenData := jwt.MapClaims{}
-	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
-		return []byte(jwtKey), nil
-	})
-	utils.HandleErr(err)
-
-	now := time.Now()
-	expiry := tokenData["expiry"].(float64)
-
-	expired := now.After(time.Unix(int64(expiry), 0))
-	if expired {
-		return false
-	}
-	if !token.Valid {
-		return false
-	}
-
-	return true
 }

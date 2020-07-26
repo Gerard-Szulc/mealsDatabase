@@ -14,6 +14,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func HandleErr(err error) {
@@ -98,4 +99,32 @@ func ValidateToken(id string, jwtToken string) bool {
 	} else {
 		return false
 	}
+
+}
+
+func ValidateRequestToken(r *http.Request) bool {
+	jwtKey, exists := os.LookupEnv("JWTKEY")
+	if !exists {
+		fmt.Println(exists)
+	}
+	jwtToken := r.Header.Get("Authorization")
+	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
+	tokenData := jwt.MapClaims{}
+	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtKey), nil
+	})
+	HandleErr(err)
+
+	now := time.Now()
+	expiry := tokenData["expiry"].(float64)
+
+	expired := now.After(time.Unix(int64(expiry), 0))
+	if expired {
+		return false
+	}
+	if !token.Valid {
+		return false
+	}
+
+	return true
 }

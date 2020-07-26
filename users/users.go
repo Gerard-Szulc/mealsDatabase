@@ -95,17 +95,33 @@ func Register(username string, email string, pass string) map[string]interface{}
 
 }
 
-func GetUser(id string, jwt string) map[string]interface{} {
-	isValid := utils.ValidateToken(id, jwt)
+func GetUser(id string) map[string]interface{} {
 	// Find and return user
-	if isValid {
-		user := &interfaces.User{}
-		if database.DB.Where("id = ? ", id).First(&user).RecordNotFound() {
-			return map[string]interface{}{"message": "error.user_not_found"}
-		}
-		var response = prepareResponse(user, false)
-		return response
-	} else {
-		return map[string]interface{}{"message": "error.token_not_valid"}
+	user := &interfaces.User{}
+	if database.DB.Where("id = ? ", id).First(&user).RecordNotFound() {
+		return map[string]interface{}{"message": "error.user_not_found"}
 	}
+	var response = prepareResponse(user, false)
+	return response
+}
+func GetUsers() map[string]interface{} {
+	// Find and return user
+	var users []interfaces.User
+	database.DB.Select("id, username, email").Find(&users)
+
+	responseUsers := []interfaces.ResponseUser{}
+	for _, user := range users {
+		responseUser := interfaces.ResponseUser{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		}
+		responseUsers = append(responseUsers, responseUser)
+	}
+
+	container := map[string]interface{}{
+		"message": "success_response",
+		"users":   responseUsers,
+	}
+	return container
 }
