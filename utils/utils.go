@@ -106,14 +106,25 @@ func ValidateRequestToken(r *http.Request) bool {
 	jwtKey, exists := os.LookupEnv("JWTKEY")
 	if !exists {
 		fmt.Println(exists)
+		return false
 	}
 	jwtToken := r.Header.Get("Authorization")
+
 	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
+	//_, err := base64.StdEncoding.DecodeString(cleanJWT)
+	//fmt.Println(err)
+	//if err != nil {
+	//	if _, ok := err.(base64.CorruptInputError); ok {
+	//		panic("\nbase64 input is corrupt, check service Key")
+	//	}
+	//	panic(err)
+	//}
 	tokenData := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtKey), nil
 	})
 	HandleErr(err)
+	//HandleErrRequest(err)
 
 	now := time.Now()
 	expiry := tokenData["expiry"].(float64)

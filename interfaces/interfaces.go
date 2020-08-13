@@ -9,8 +9,8 @@ type User struct {
 	Username string
 	Email    string
 	Password string
-	Active   bool    `gorm:"default:false"`
-	Meals    []*Meal `gorm:"many2many:user_meals;"`
+	Active   bool   `gorm:"default:false"`
+	Meals    []Meal `gorm:"many2many:user_meals;"`
 }
 
 type ResponseUser struct {
@@ -38,17 +38,25 @@ type Meal struct {
 	gorm.Model
 	Name        string
 	Label       string
-	Ingredients []*Ingredient `gorm:"many2many:meal_ingredients;"`
+	Ingredients []Ingredient `gorm:"many2many:meal_ingredients;"`
 	Description string
-	Categories  []*MealTypeCategory `gorm:"many2many:meal_categories;"`
-	Users       []*User             `gorm:"many2many:user_meals;"`
+	Categories  []MealTypeCategory `gorm:"many2many:meal_categories;"`
+	Users       []User             `gorm:"many2many:user_meals;"`
+}
+
+type MealResponse struct {
+	Name        string
+	Label       string
+	Ingredients []Ingredient
+	Description string
+	Categories  []MealTypeCategory
 }
 
 type MealTypeCategory struct {
 	gorm.Model
 	Name  string
 	Label string
-	Meals []*Meal `gorm:"many2many:meal_categories;"`
+	Meals []Meal `gorm:"many2many:meal_categories;"`
 }
 
 type Ingredient struct {
@@ -56,13 +64,13 @@ type Ingredient struct {
 	Name                 string
 	Label                string
 	Calories             float64
-	IngredientCategories []*IngredientTypeCategory `gorm:"many2many:ingredient_categories;"`
-	Meals                []*Meal                   `gorm:"many2many:meal_ingredients;"`
+	IngredientCategories []IngredientTypeCategory `gorm:"many2many:ingredient_categories;"`
+	Meals                []Meal                   `gorm:"many2many:meal_ingredients;"`
 }
 
 type IngredientTypeCategory struct {
 	gorm.Model
 	Name        string
 	Label       string
-	Ingredients []*Ingredient `gorm:"many2many:ingredient_categories;"`
+	Ingredients []Ingredient `gorm:"many2many:ingredient_categories;"`
 }
