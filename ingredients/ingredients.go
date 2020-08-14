@@ -1,10 +1,15 @@
 package ingredients
 
 import (
+	"net/http"
+
 	"github.com/Gerard-Szulc/mealsDatabase/database"
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
+	"github.com/Gerard-Szulc/mealsDatabase/utils"
+	"github.com/gorilla/mux"
 )
 
+//GetIngredients gets all ingredients from database
 func GetIngredients() map[string]interface{} {
 
 	var ingredients []interfaces.Ingredient
@@ -19,6 +24,7 @@ func GetIngredients() map[string]interface{} {
 	return container
 }
 
+//GetIngredient gets single ingredient with associated meals
 func GetIngredient(id string) map[string]interface{} {
 
 	var ingredient interfaces.Ingredient
@@ -35,4 +41,30 @@ func GetIngredient(id string) map[string]interface{} {
 		"message": "success_ingredient_found",
 	}
 	return container
+}
+
+//GetIngredientsRoute is for getting all or find list of ingredients by its labels
+func GetIngredientsRoute(w http.ResponseWriter, r *http.Request) {
+	if !utils.ValidateRequestToken(r) {
+		utils.ApiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
+		return
+	}
+	responseIngredients := GetIngredients()
+	utils.ApiResponse(responseIngredients, w)
+}
+
+//GetIngredientRoute siple getting single ingredient
+func GetIngredientRoute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	mealID := vars["id"]
+
+	if !utils.ValidateRequestToken(r) {
+		utils.ApiResponse(map[string]interface{}{
+			"message": "error:token_not_valid",
+			"code":    400,
+		}, w)
+		return
+	}
+	responseIngredient := GetIngredient(mealID)
+	utils.ApiResponse(responseIngredient, w)
 }

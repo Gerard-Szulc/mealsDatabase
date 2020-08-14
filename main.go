@@ -9,7 +9,7 @@ import (
 
 func start () {
 	database.InitDatabase()
-	api.StartApi()
+	api.StartAPI()
 }
 
 func main() {

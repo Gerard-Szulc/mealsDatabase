@@ -139,3 +139,17 @@ func ValidateRequestToken(r *http.Request) bool {
 
 	return true
 }
+
+
+func ApiResponse(call map[string]interface{}, w http.ResponseWriter) {
+	str := fmt.Sprintf("%v", call["message"])
+	if strings.Contains(str, "success") {
+		delete(call, "message")
+		resp := call
+		json.NewEncoder(w).Encode(resp)
+	} else {
+		resp := call
+		w.WriteHeader(call["code"].(int))
+		json.NewEncoder(w).Encode(resp)
+	}
+}
