@@ -1,9 +1,9 @@
 package main
 
 import (
-	"mealsDatabase/api"
-	"mealsDatabase/database"
-	"mealsDatabase/migrations"
+	"github.com/Gerard-Szulc/mealsDatabase/api"
+	"github.com/Gerard-Szulc/mealsDatabase/database"
+	"github.com/Gerard-Szulc/mealsDatabase/migrations"
 	"os"
 )
 

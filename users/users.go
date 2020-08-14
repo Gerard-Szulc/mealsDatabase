@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"golang.org/x/crypto/bcrypt"
-	"mealsDatabase/database"
-	"mealsDatabase/interfaces"
-	"mealsDatabase/utils"
+	"github.com/Gerard-Szulc/mealsDatabase/database"
+	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
+	"github.com/Gerard-Szulc/mealsDatabase/utils"
 	"os"
 	"time"
 )

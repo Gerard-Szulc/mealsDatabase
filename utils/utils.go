@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"mealsDatabase/interfaces"
+	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"net/http"
 	"os"
 	"regexp"

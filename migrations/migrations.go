@@ -2,9 +2,9 @@ package migrations
 
 import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"mealsDatabase/database"
-	"mealsDatabase/interfaces"
-	"mealsDatabase/utils"
+	"github.com/Gerard-Szulc/mealsDatabase/database"
+	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
+	"github.com/Gerard-Szulc/mealsDatabase/utils"
 )
 
 func createAccounts() {

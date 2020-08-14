@@ -1,8 +1,8 @@
 package ingredients
 
 import (
-	"mealsDatabase/database"
-	"mealsDatabase/interfaces"
+	"github.com/Gerard-Szulc/mealsDatabase/database"
+	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 )
 
 func GetIngredients() map[string]interface{} {
