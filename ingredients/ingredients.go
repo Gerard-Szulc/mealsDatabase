@@ -49,6 +49,15 @@ func GetIngredientsRoute(w http.ResponseWriter, r *http.Request) {
 		utils.ApiResponse(map[string]interface{}{"message": "error:token_not_valid"}, w)
 		return
 	}
+
+	q := r.URL.Query()
+	label := q.Get("search")
+	if label != "" {
+		responseIngredients := searchIngredients(label)
+		utils.ApiResponse(responseIngredients, w)
+		return
+	}
+
 	responseIngredients := GetIngredients()
 	utils.ApiResponse(responseIngredients, w)
 }
@@ -67,4 +76,22 @@ func GetIngredientRoute(w http.ResponseWriter, r *http.Request) {
 	}
 	responseIngredient := GetIngredient(mealID)
 	utils.ApiResponse(responseIngredient, w)
+}
+
+func searchIngredients(label string) map[string]interface{} {
+
+	var ingredients []interfaces.Ingredient
+
+	if database.DB.Where("label LIKE ? ", label+"%").Preload("Meals").Find(&ingredients).RecordNotFound() {
+		return map[string]interface{}{
+			"message": "error.ingredient_not_found",
+			"code":    404,
+		}
+	}
+
+	container := map[string]interface{}{
+		"data":    ingredients,
+		"message": "success_ingredient_found",
+	}
+	return container
 }

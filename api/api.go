@@ -109,7 +109,7 @@ func getMeals(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := r.URL.Query()
-	label := q.Get("find")
+	label := q.Get("search")
 	if label != "" {
 		responseMeals := meals.SearchMeals(label)
 		utils.ApiResponse(responseMeals, w)
@@ -119,9 +119,10 @@ func getMeals(w http.ResponseWriter, r *http.Request) {
 	responseMeals := meals.GetMeals()
 	utils.ApiResponse(responseMeals, w)
 }
+
 func getMeal(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	mealId := vars["id"]
+	mealID := vars["id"]
 
 	if !utils.ValidateRequestToken(r) {
 		utils.ApiResponse(map[string]interface{}{
@@ -130,7 +131,7 @@ func getMeal(w http.ResponseWriter, r *http.Request) {
 		}, w)
 		return
 	}
-	responseMeal := meals.GetMeal(mealId)
+	responseMeal := meals.GetMeal(mealID)
 	utils.ApiResponse(responseMeal, w)
 }
 func searchMeals(w http.ResponseWriter, r *http.Request) {
