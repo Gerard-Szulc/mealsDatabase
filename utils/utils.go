@@ -3,18 +3,19 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
-	"github.com/joho/godotenv"
-	"golang.org/x/crypto/bcrypt"
 	"log"
-	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
+	"github.com/dgrijalva/jwt-go"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func HandleErr(err error) {
@@ -32,15 +33,21 @@ func HashAndSalt(pass []byte) string {
 func init() {
 	// loads values from .env into the system
 	env := os.Getenv("FINT_ENV")
+	fmt.Println(env)
+
 	if "" == env {
 		env = "development"
 	}
 
 	godotenv.Load(".env." + env + ".local")
+		fmt.Println(".env." + env + ".local")
+
 	if "test" != env {
 		godotenv.Load(".env.local")
 	}
 	godotenv.Load(".env." + env)
+		fmt.Println(".env." + env)
+
 	err := godotenv.Load()
 	HandleErr(err)
 }
@@ -139,7 +146,6 @@ func ValidateRequestToken(r *http.Request) bool {
 
 	return true
 }
-
 
 func ApiResponse(call map[string]interface{}, w http.ResponseWriter) {
 	str := fmt.Sprintf("%v", call["message"])

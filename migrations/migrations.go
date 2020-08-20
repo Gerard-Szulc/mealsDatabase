@@ -1,10 +1,11 @@
 package migrations
 
 import (
-	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/Gerard-Szulc/mealsDatabase/database"
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"github.com/Gerard-Szulc/mealsDatabase/utils"
+	// imported for migration
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func createAccounts() {
@@ -17,7 +18,7 @@ func createAccounts() {
 		database.DB.Create(&user)
 	}
 }
-
+//Migrate performs database migration
 func Migrate() {
 	User := &interfaces.User{}
 	Meal := &interfaces.Meal{}
@@ -26,5 +27,5 @@ func Migrate() {
 	MealCategory := &interfaces.MealTypeCategory{}
 	database.DB.AutoMigrate(&User, &Meal, &Ingredient, &IngredientCategory, &MealCategory)
 
-	createAccounts()
+	// createAccounts()
 }

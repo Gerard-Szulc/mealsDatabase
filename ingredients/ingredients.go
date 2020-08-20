@@ -1,12 +1,17 @@
 package ingredients
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/Gerard-Szulc/mealsDatabase/database"
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"github.com/Gerard-Szulc/mealsDatabase/utils"
 	"github.com/gorilla/mux"
+	"github.com/jinzhu/gorm"
 )
 
 //GetIngredients gets all ingredients from database
@@ -25,11 +30,11 @@ func GetIngredients() map[string]interface{} {
 }
 
 //GetIngredient gets single ingredient with associated meals
-func GetIngredient(id string) map[string]interface{} {
+func GetIngredient(id string, DB *gorm.DB) map[string]interface{} {
 
 	var ingredient interfaces.Ingredient
 
-	if database.DB.Where("id = ? ", id).Preload("Meals").Preload("Meals.Ingredients").Preload("Meals.Categories").Find(&ingredient).RecordNotFound() {
+	if DB.Where("id = ? ", id).Preload("Meals").Preload("Meals.Ingredients").Preload("Meals.Categories").Find(&ingredient).RecordNotFound() {
 		return map[string]interface{}{
 			"message": "error.ingredient_not_found",
 			"code":    404,
@@ -74,7 +79,7 @@ func GetIngredientRoute(w http.ResponseWriter, r *http.Request) {
 		}, w)
 		return
 	}
-	responseIngredient := GetIngredient(mealID)
+	responseIngredient := GetIngredient(mealID, database.DB)
 	utils.ApiResponse(responseIngredient, w)
 }
 
@@ -92,6 +97,44 @@ func searchIngredients(label string) map[string]interface{} {
 	container := map[string]interface{}{
 		"data":    ingredients,
 		"message": "success_ingredient_found",
+	}
+	return container
+}
+
+func AddIngredientRoute(w http.ResponseWriter, r *http.Request) {
+	//auth := r.Header.Get("Authorization")
+	body, _ := ioutil.ReadAll(r.Body)
+	var ingredient interfaces.Ingredient
+	err := json.Unmarshal(body, &ingredient)
+	utils.HandleErr(err)
+
+	if !utils.ValidateRequestToken(r) {
+		utils.ApiResponse(map[string]interface{}{
+			"message": "error:token_not_valid",
+			"code":    400,
+		}, w)
+		return
+	}
+	responseIngredient := AddIngredient(ingredient, w)
+	utils.ApiResponse(responseIngredient, w)
+}
+
+func AddIngredient(ingredient interfaces.Ingredient, w http.ResponseWriter) map[string]interface{} {
+
+	isAllowed := database.DB.NewRecord(ingredient)
+	if !isAllowed {
+		container := map[string]interface{}{
+			"message": "error_ingredient_id_exists",
+			"code":    403,
+		}
+		utils.ApiResponse(container, w)
+		utils.HandleErr(errors.New("error_ingredient_id_exists"))
+	}
+
+	database.DB.Create(&ingredient)
+	container := map[string]interface{}{
+		"data":    ingredient,
+		"message": "success_ingredient_added",
 	}
 	return container
 }
