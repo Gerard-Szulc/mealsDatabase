@@ -3,7 +3,6 @@ package ingredients
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
