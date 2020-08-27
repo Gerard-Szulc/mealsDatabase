@@ -17,7 +17,6 @@ func SetupTests() *gorm.DB {
 	mocket.Catcher.Logging = true
 	// GORM
 	db, err := gorm.Open(mocket.DriverName, "example")
-	db = db
 	if err != nil {
 		panic(err)
 	}

@@ -6,12 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Gerard-Szulc/mealsDatabase/ingredients"
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"github.com/Gerard-Szulc/mealsDatabase/meals"
 	"github.com/Gerard-Szulc/mealsDatabase/users"
 	"github.com/Gerard-Szulc/mealsDatabase/utils"
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 )
 
@@ -31,8 +33,7 @@ func readBody(r *http.Request) []byte {
 //StartAPI starts routing
 func StartAPI() {
 	router := mux.NewRouter()
-	router.Use(utils.PanicHandler)
-	router.HandleFunc("/login", login).Methods("POST").Name("login")
+	router.HandleFunc("/login", login).Methods("POST").Name("login").Headers()
 	router.HandleFunc("/register", register).Methods("POST").Name("register")
 	router.HandleFunc("/users", getUsers).Methods("GET").Name("get_users")
 	router.HandleFunc("/users/{id}", getUser).Methods("GET").Name("get_user")
@@ -44,8 +45,16 @@ func StartAPI() {
 	router.HandleFunc("/ingredients", ingredients.AddIngredientRoute).Methods("POST").Name("post_ingredient")
 	router.HandleFunc("/ingredients/{id}", ingredients.GetIngredientRoute).Methods("GET").Name("get_ingredient")
 
-	fmt.Println("App is working on port :2137")
-	log.Fatal(http.ListenAndServe(":2137", router))
+	port, exists := os.LookupEnv("PORT")
+	if !exists {
+		fmt.Println(exists)
+	}
+	fmt.Println("App is working on port :" + string(port))
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With"})
+	originsOk := handlers.AllowedOrigins([]string{os.Getenv("ORIGIN_ALLOWED")})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	log.Fatal(http.ListenAndServe(":"+string(port), handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
