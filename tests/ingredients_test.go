@@ -1,4 +1,4 @@
-package tests
+package mealdbtests
 
 import (
 	"testing"
@@ -33,7 +33,7 @@ func TestGetIngredient(t *testing.T) {
 	}
 
 	commonReply := []map[string]interface{}{{
-		"id":                    2,
+		"id":                    uint(2),
 		"name":                  "",
 		"label":                 "",
 		"calories":              nil,
@@ -44,7 +44,7 @@ func TestGetIngredient(t *testing.T) {
 		"deleted_at":            time.Time{},
 	}}
 
-	t.Run("1", func(t *testing.T) {
+	t.Run("Checks length of rerurned map is 2", func(t *testing.T) {
 		mocket.Catcher.Logging = true
 
 		mocket.Catcher.Reset().NewMock().WithID(2).WithReply(commonReply)
@@ -56,9 +56,8 @@ func TestGetIngredient(t *testing.T) {
 		}
 	})
 
-	t.Run("2", func(t *testing.T) {
+	t.Run("Check id returned from database is the same as on mock", func(t *testing.T) {
 		mocket.Catcher.Logging = true
-
 		mocket.Catcher.Reset().NewMock().WithID(2).WithReply(commonReply)
 
 		result := ingredients.GetIngredient("2", db)
@@ -66,8 +65,8 @@ func TestGetIngredient(t *testing.T) {
 
 		ingre := data.(interfaces.Ingredient)
 
-		if ingre.ID == commonReply[0]["id"] {
-			t.Errorf("Returned sets is not equal to 1. Received %d", len(result))
+		if ingre.ID != commonReply[0]["id"] {
+			t.Errorf("Returned ingredient id %d is not equal to id of commonReply %d .  ", ingre.ID, commonReply[0]["id"])
 		}
 	})
 }
