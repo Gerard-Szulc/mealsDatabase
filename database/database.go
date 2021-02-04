@@ -2,8 +2,8 @@ package database
 
 import (
 	"fmt"
-	"github.com/jinzhu/gorm"
 	"github.com/Gerard-Szulc/mealsDatabase/utils"
+	"github.com/jinzhu/gorm"
 	"os"
 )
 

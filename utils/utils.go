@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -40,13 +41,13 @@ func init() {
 	}
 
 	godotenv.Load(".env." + env + ".local")
-		fmt.Println(".env." + env + ".local")
+	fmt.Println(".env." + env + ".local")
 
 	if "test" != env {
 		godotenv.Load(".env.local")
 	}
 	godotenv.Load(".env." + env)
-		fmt.Println(".env." + env)
+	fmt.Println(".env." + env)
 
 	err := godotenv.Load()
 	HandleErr(err)
@@ -116,16 +117,32 @@ func ValidateRequestToken(r *http.Request) bool {
 		return false
 	}
 	jwtToken := r.Header.Get("Authorization")
-
 	cleanJWT := strings.Replace(jwtToken, "Bearer ", "", -1)
-	//_, err := base64.StdEncoding.DecodeString(cleanJWT)
-	//fmt.Println(err)
-	//if err != nil {
-	//	if _, ok := err.(base64.CorruptInputError); ok {
-	//		panic("\nbase64 input is corrupt, check service Key")
-	//	}
-	//	panic(err)
-	//}
+	cleanJWTHeader := strings.Split(cleanJWT, ".")[0]
+	cleanJWTPayload := strings.Split(cleanJWT, ".")[1]
+	cleanJWTSecret := strings.Split(cleanJWT, ".")[2]
+	_, err := jwt.DecodeSegment(cleanJWTHeader)
+	if err != nil {
+		if _, ok := err.(base64.CorruptInputError); ok {
+			panic("\nbase64 input is corrupt, check service Key")
+		}
+		panic(err)
+	}
+	_, err = jwt.DecodeSegment(cleanJWTPayload)
+	if err != nil {
+		if _, ok := err.(base64.CorruptInputError); ok {
+			panic("\nbase64 input is corrupt, check service Key")
+		}
+		panic(err)
+	}
+	_, err = jwt.DecodeSegment(cleanJWTSecret)
+	if err != nil {
+		if _, ok := err.(base64.CorruptInputError); ok {
+			panic("\nbase64 input is corrupt, check service Key")
+		}
+		panic(err)
+	}
+
 	tokenData := jwt.MapClaims{}
 	token, err := jwt.ParseWithClaims(cleanJWT, tokenData, func(token *jwt.Token) (interface{}, error) {
 		return []byte(jwtKey), nil

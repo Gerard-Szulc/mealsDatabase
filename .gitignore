@@ -2,3 +2,5 @@
 /.env
 /.env.local
 /mealsDatabase.exe
+/.vscode/
+/.env.development.local
