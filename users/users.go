@@ -2,11 +2,11 @@ package users
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"golang.org/x/crypto/bcrypt"
 	"github.com/Gerard-Szulc/mealsDatabase/database"
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
 	"github.com/Gerard-Szulc/mealsDatabase/utils"
+	"github.com/golang-jwt/jwt"
+	"golang.org/x/crypto/bcrypt"
 	"os"
 	"time"
 )

@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/Gerard-Szulc/mealsDatabase/interfaces"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
